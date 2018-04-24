@@ -9,6 +9,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class Main extends Application
     private Pane layout;
     private Scene scene;
 
-    private List<Snake> snakes = new LinkedList<>();
+    private List<Snake> snakes = new ArrayList<>();
     private Food food;
 
     private int score = 0;
@@ -29,9 +30,9 @@ public class Main extends Application
     @Override
     public void start(Stage primaryStage) throws Exception
     {
-        snakes.add(new Snake(Constants.snakeSegmentSize*2,0));
-        snakes.add(new Snake(Constants.snakeSegmentSize,0));
-        snakes.add(new Snake(0,0));
+        snakes.add(new Snake(Constants.snakeSegmentSize*2,0, Constants.Direction.right));
+        snakes.add(new Snake(Constants.snakeSegmentSize,0, Constants.Direction.right));
+        snakes.add(new Snake(0,0, Constants.Direction.right));
 
         food = new Food();
 
@@ -54,6 +55,8 @@ public class Main extends Application
             {
                 for (Snake snake : snakes)
                     snake.update();
+                for(int i=snakes.size()-1; i>=1; i--)
+                    snakes.get(i).setDir( snakes.get(i-1).getDir() );
                 if(snakes.get(0).getX() == food.getX() && snakes.get(0).getY() == food.getY())
                     scored();
                 else
@@ -65,8 +68,7 @@ public class Main extends Application
                     if(snakes.get(0).getX() == snakes.get(i).getX() && snakes.get(0).getY() == snakes.get(i).getY())
                         lost();
 
-                for(int i=snakes.size()-1; i>=1; i--)
-                    snakes.get(i).setDir( snakes.get(i-1).getDir() );
+
             }
 
         };
@@ -81,22 +83,28 @@ public class Main extends Application
                     case UP:
                         if(snakes.get(0).getDir() != Constants.Direction.down)
                             snakes.get(0).setDir(Constants.Direction.up);
-                    break;
+                        break;
                     case DOWN:
                         if(snakes.get(0).getDir() != Constants.Direction.up)
                             snakes.get(0).setDir(Constants.Direction.down);
-                    break;
+                        break;
                     case LEFT:
                         if(snakes.get(0).getDir() != Constants.Direction.right)
                             snakes.get(0).setDir(Constants.Direction.left);
-                    break;
+                        break;
                     case RIGHT:
                         if(snakes.get(0).getDir() != Constants.Direction.left)
                             snakes.get(0).setDir(Constants.Direction.right);
-                    break;
+                        break;
                     case ESCAPE:
                         reset(primaryStage);
-                    break;
+                        break;
+                    case Z:
+                        timer.stop();
+                        break;
+                    case X:
+                        timer.start();
+                        break;
                 }
             }
         });
@@ -109,21 +117,23 @@ public class Main extends Application
         score++;
         System.out.println("You scored! Score: " + score);
         food.relocate();
-        int x = snakes.get(snakes.size()-1).getX();
-        int y = snakes.get(snakes.size()-1).getY();
 
-        if(snakes.get(snakes.size()-2).getDir() == Constants.Direction.right)
+        int last = snakes.size()-1;
+        int x = snakes.get(last).getX();
+        int y = snakes.get(last).getY();
+
+        if(snakes.get(last).getDir() == Constants.Direction.right)
             x -= Constants.snakeSegmentSize;
-        else if(snakes.get(snakes.size()-2).getDir() == Constants.Direction.left)
+        else if(snakes.get(last).getDir() == Constants.Direction.left)
             x += Constants.snakeSegmentSize;
-        else if(snakes.get(snakes.size()-2).getDir() == Constants.Direction.up)
+        else if(snakes.get(last).getDir() == Constants.Direction.up)
             y += Constants.snakeSegmentSize;
-        else if(snakes.get(snakes.size()-2).getDir() == Constants.Direction.down)
+        else if(snakes.get(last).getDir() == Constants.Direction.down)
             y -= Constants.snakeSegmentSize;
 
 
-        snakes.add(new Snake(x,y));
-        layout.getChildren().add(snakes.get(snakes.size()-1).rect);
+        snakes.add(new Snake(x,y, snakes.get(last).getDir()));
+        layout.getChildren().add(snakes.get(last+1).rect);
     }
 
     void lost()
@@ -138,9 +148,9 @@ public class Main extends Application
         layout.getChildren().removeAll();
         snakes.clear();
 
-        snakes.add(new Snake(Constants.snakeSegmentSize*2,0));
-        snakes.add(new Snake(Constants.snakeSegmentSize,0));
-        snakes.add(new Snake(0,0));
+        snakes.add(new Snake(Constants.snakeSegmentSize*2,0, Constants.Direction.right));
+        snakes.add(new Snake(Constants.snakeSegmentSize,0, Constants.Direction.right));
+        snakes.add(new Snake(0,0, Constants.Direction.right));
 
         food = new Food();
 

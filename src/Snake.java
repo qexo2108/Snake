@@ -1,4 +1,3 @@
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class Snake
@@ -6,25 +5,29 @@ public class Snake
     private int x;
     private int y;
     private Constants.Direction dir;
+    private Constants.Direction inputDir;
 
     Rectangle rect;
 
-    public Snake(int x, int y)
+    public Snake(int x, int y, Constants.Direction dir)
     {
         this.x = x;
         this.y = y;
+        this.dir = dir;
+        inputDir = dir;
 
         rect = new Rectangle(Constants.snakeSegmentSize, Constants.snakeSegmentSize);
         rect.setFill(Constants.snakeColor);
         rect.relocate(x,y);
-
-        dir = Constants.Direction.right;
     }
 
 
     void update()
     {
-        // Przesunięcie węża
+        // Load input
+        dir = inputDir;
+
+        // Move the snake
         if(dir == Constants.Direction.down)
             y += Constants.snakeSegmentSize;
         else if(dir == Constants.Direction.up)
@@ -34,7 +37,7 @@ public class Snake
         else
             x += Constants.snakeSegmentSize;
 
-        // Obsługa wyjścia poza ekran
+        // Handling out of window situation
         if(x >= Constants.windowWidth)
             x = 0;
         else if(x < 0)
@@ -48,7 +51,7 @@ public class Snake
 
     void setDir(Constants.Direction dir)
     {
-        this.dir = dir;
+        this.inputDir = dir;
     }
     Constants.Direction getDir()
     {
