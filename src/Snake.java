@@ -1,70 +1,95 @@
-import javafx.scene.shape.Rectangle;
+import javafx.scene.layout.Pane;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Snake
+class Snake
 {
-    private int x;
-    private int y;
-    private Constants.Direction dir;
-    private Constants.Direction inputDir;
+    private Pane layout;
+    private List<SnakeSegment> snakes;
 
-    Rectangle rect;
-
-    public Snake(int x, int y, Constants.Direction dir)
+    Snake()
     {
-        this.x = x;
-        this.y = y;
-        this.dir = dir;
-        inputDir = dir;
+        snakes = new ArrayList<>();
+        createStartingSegments();
 
-        rect = new Rectangle(Constants.snakeSegmentSize, Constants.snakeSegmentSize);
-        rect.setFill(Constants.snakeColor);
-        rect.relocate(x,y);
+        layout = new Pane();
+        for (SnakeSegment snake : snakes)
+            layout.getChildren().add(snake.rect);
     }
-
 
     void update()
     {
-        // Load input
-        dir = inputDir;
+        for(SnakeSegment snake : snakes)
+            snake.update();
+        for(int i=snakes.size()-1; i>=1; i--)
+            snakes.get(i).setDir( snakes.get(i-1).getDir() );
+    }
 
-        // Move the snake
-        if(dir == Constants.Direction.down)
-            y += Constants.snakeSegmentSize;
-        else if(dir == Constants.Direction.up)
-            y-= Constants.snakeSegmentSize;
-        else if(dir == Constants.Direction.left)
+    void scored()
+    {
+        int last = snakes.size()-1;
+        int x = snakes.get(last).getX();
+        int y = snakes.get(last).getY();
+
+        if(snakes.get(last).getDir() == Constants.Direction.right)
             x -= Constants.snakeSegmentSize;
-        else
+        else if(snakes.get(last).getDir() == Constants.Direction.left)
             x += Constants.snakeSegmentSize;
+        else if(snakes.get(last).getDir() == Constants.Direction.up)
+            y += Constants.snakeSegmentSize;
+        else if(snakes.get(last).getDir() == Constants.Direction.down)
+            y -= Constants.snakeSegmentSize;
 
-        // Handling out of window situation
-        if(x >= Constants.windowWidth)
-            x = 0;
-        else if(x < 0)
-            x = Constants.windowWidth - Constants.snakeSegmentSize;
-        else if(y >= Constants.windowHeight)
-            y = 0;
-        else if(y < 0)
-            y = Constants.windowHeight - Constants.snakeSegmentSize;
-        rect.relocate(x,y);
+        snakes.add(new SnakeSegment(x,y, snakes.get(last).getDir()));
+        layout.getChildren().add(snakes.get(last+1).rect);
     }
 
-    void setDir(Constants.Direction dir)
+    void reset()
     {
-        this.inputDir = dir;
+        layout = new Pane();
+        snakes.clear();
+
+        createStartingSegments();
+        for(SnakeSegment snake: snakes)
+            layout.getChildren().add(snake.rect);
     }
-    Constants.Direction getDir()
+
+    private void createStartingSegments()
     {
-        return dir;
+        snakes.add(new SnakeSegment(Constants.snakeSegmentSize*2,0, Constants.Direction.right));
+        snakes.add(new SnakeSegment(Constants.snakeSegmentSize,0, Constants.Direction.right));
+        snakes.add(new SnakeSegment(0,0, Constants.Direction.right));
+    }
+
+
+    boolean ifLost()
+    {
+        for(int i=1; i<snakes.size(); i++)
+            if(this.getX() == snakes.get(i).getX() && this.getY() == snakes.get(i).getY())
+                return true;
+        return false;
     }
 
     int getX()
     {
-        return x;
+        return snakes.get(0).getX();
     }
     int getY()
     {
-        return y;
+        return snakes.get(0).getY();
     }
 
+    void setDir(Constants.Direction dir)
+    {
+        snakes.get(0).setDir(dir);
+    }
+    Constants.Direction getDir()
+    {
+        return snakes.get(0).getDir();
+    }
+
+    Pane getLayout()
+    {
+        return layout;
+    }
 }

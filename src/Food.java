@@ -1,8 +1,7 @@
 import javafx.scene.shape.Rectangle;
-
 import java.util.Random;
 
-public class Food
+class Food
 {
     private int x;
     private int y;
